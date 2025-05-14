@@ -393,4 +393,9 @@ result // => true
   * `2 = p.peekToken`
   * loops here...
 ### 2.8 - Extending the Parser
-* The book completely changed the test suite here...? Why?
+* Capital first letter = Public; lower first letter = Private for method names
+* Adding function literals in this chapter
+
+### 2.9 - Read-Parse-Print-Loop
+* Until now the REPL was more of a RLPL (Read, Lex, Parse, Loop)
+* Next we're going to change it to an RPPL (Read, Parse, Print, Loop)
