@@ -1,5 +1,7 @@
 # Writing an Interpreter in Go
+
 ## Interpreter features:
+
 * Tokenize and parse Monkey source code in a REPL
 
 1. The Lexer
@@ -9,14 +11,17 @@
 5. The Evaluator
 
 ## 1 - Lexing
+
 ### 1.1 - Lexical Analysis
+
 * Source Code → Tokens → Abstract Syntax Tree
 * Lexical Analysis or "Lexing" is the transformation from Source Code to Tokens.
 * This is done by a Lexer, aka Tokenizer or Scanner
 * Tokens are small, easily categorizable data structures which can be fed to the parser
 * Example input to lexer:
-`let x = 5 + 5;`
+  `let x = 5 + 5;`
 * Example output:
+
 ```
 [
 LET,
@@ -28,22 +33,36 @@ INTEGER(5),
 SEMICOLON
 ]
 ```
+
 ### 1.2 - Defining Our Tokens
+
 `~/projects/writingAnInterpreterInGo/token/token.go`
+
 ### 1.3 - The Lexer
-* Only one method called `NextToken()` so no need to buffer or save tokens for this exercise. This method will output the value of the next token, and when calling the lexer the `NextToken()` method will be called repeatedly until the EOF token is read.
+
+* Only one method called `NextToken()` so no need to buffer or save tokens for this exercise. This method will output
+  the value of the next token, and when calling the lexer the `NextToken()` method will be called repeatedly until the
+  EOF token is read.
+
 ### 1.4 - Extending our Token Set and Lexer
+
 ### 1.5 - Start of a REPL
+
 `writingAnInterpreterInGo/repl/repl.go`
 
 ## 2 - Parsing
+
 ### 2.1 - Parsers
-* A parser takes input data (typically text) and builds a data structure. It gives a structural representation of the input, making sure the syntax is correct. It’s usually preceded by a separate lexical analyzer which creates the tokens from the input characters.
+
+* A parser takes input data (typically text) and builds a data structure. It gives a structural representation of the
+  input, making sure the syntax is correct. It’s usually preceded by a separate lexical analyzer which creates the
+  tokens from the input characters.
 * Types of data structures:
-    * Parse tree
-    * Abstract syntax tree
-    * Other hierarchical structures
+  * Parse tree
+  * Abstract syntax tree
+  * Other hierarchical structures
 * Ex:
+
 ```
 > var input = '{"name": "Testname", "age": 100}';
 > var output = JSON.parse(input);
@@ -54,9 +73,13 @@ SEMICOLON
 > output.age
 100
 ```
-* An Abstract Syntax Tree is "abstract" based on certain details being omitted in the AST. Examples include Semicolons, newlines, whitespace, comments, braces, brackets, and parentheses. They aren’t represented in the AST, but guiding the parser when constructing it.
+
+* An Abstract Syntax Tree is "abstract" based on certain details being omitted in the AST. Examples include Semicolons,
+  newlines, whitespace, comments, braces, brackets, and parentheses. They aren’t represented in the AST, but guiding the
+  parser when constructing it.
 
 #### Parser Input:
+
 ```javascript
 if (3 * 5 > 10) {
   return "hello";
@@ -66,6 +89,7 @@ if (3 * 5 > 10) {
 ```
 
 #### Parser Output:
+
 ```
 > var input = 'if (3 * 5 > 10) { return "hello"; } else { return "goodbye"; }';
 > var tokens = MagicLexer.parse(input);
@@ -108,14 +132,18 @@ if (3 * 5 > 10) {
   }
 }
 ```
+
 * Parsers analyze the input, checking that it conforms to the expected data structure.
 * Parsing is also known as syntactic analysis.
 
 ### 2.2 - Why not a parser generator?
+
 * Context-Free Grammar (CFG) is the input for the majority of parser generators (ex. Yacc, Bison, or ANTLR.
-* CFGs are a set of rules that describe how to form correct (valid syntactically) sentences in a language. The most common notational formats of CFGs are Backus-Naur Form (BNF) or the Extended Backus-Naur Form (EBNF).
+* CFGs are a set of rules that describe how to form correct (valid syntactically) sentences in a language. The most
+  common notational formats of CFGs are Backus-Naur Form (BNF) or the Extended Backus-Naur Form (EBNF).
 
 EmcaScript syntax in BNF:
+
 ```
 PrimaryExpression ::= "this"
   | ObjectLiteral
@@ -144,24 +172,31 @@ PropertyName ::= Identifier
   | <STRING_LITERAL>
   | <DECIMEL_LITERAL>
 ```
+
 * A parser generator would take something like the above and turn it into compilable C code.
 
 ### 2.3 - Writing a Parser for the Monkey Programming Language
+
 Two main strategies when parsing a programming language:
+
 * Top-down parsing
-    * **_Recursive descent parsing_** - This is the parser we’ll be writing for Monkey, and in particular it’s a **"top down operator precedence"** parser, aka a "Pratt parser" after Vaughan Pratt.
-    * Early parsing
-    * Predictive parsing
-    * Begins with constructing root node of the AST and then descends
-    * Recommended for newcomers to parsers
+  * **_Recursive descent parsing_** - This is the parser we’ll be writing for Monkey, and in particular it’s a **"top
+    down operator precedence"** parser, aka a "Pratt parser" after Vaughan Pratt.
+  * Early parsing
+  * Predictive parsing
+  * Begins with constructing root node of the AST and then descends
+  * Recommended for newcomers to parsers
 * Bottom-up parsing
+
 1. Parsing statements (let and return)
 2. Parsing expressions
 3. Extend parser to be capable of parsing a large subset of Monkey programming language.
 4. As we go along, build up necessary structures for our AST
 
 ### 2.4 - Parser's first steps: parsing let statements
+
 * Variable bindings are statements of the following form (let statements):
+
 ```javascript
 let x = 5;
 let y = 10;
@@ -169,7 +204,9 @@ let foobar = add(5, 5);
 let boofar = 5 * 5 / 10 + 18 - add(5, 5) + multiply(124);
 let anotherName = barfoo;
 ```
+
 #### Valid Monkey program:
+
 ```
 let x = 10;
 let y = 15;
@@ -177,10 +214,13 @@ let add = fn(a, b) {
   return a + b;
 };
 ```
+
 #### Variable binding base-parts:
+
 ```
 let <identifier> = <expression>;
 ```
+
 * Expressions produce values:
   * `5`
   * `add(5, 5)`
@@ -188,10 +228,14 @@ let <identifier> = <expression>;
   * `let x = 5`
   * `return 5`
 
-* Every node in the AST has to implement the `Node` interface. It has to provide a `TokenLiteral()` method that returns the literal value of the token it's associated with.
+* Every node in the AST has to implement the `Node` interface. It has to provide a `TokenLiteral()` method that returns
+  the literal value of the token it's associated with.
 * The `TokenLiteral()` will only be used for debugging/testing.
-* Identifiers in other parts of a Monkey program **do** produce values, e.g.: `let x = valueProducingIdentifier;` so we have the Identifier struct type implement the Expression interface for simplicity.
+* Identifiers in other parts of a Monkey program **do** produce values, e.g.: `let x = valueProducingIdentifier;` so we
+  have the Identifier struct type implement the Expression interface for simplicity.
+
 #### AST representation of `let x = 5;` in Monkey programming language
+
 ```
             [ *ast.Program ]
             [  Statements  ]
@@ -206,6 +250,7 @@ let <identifier> = <expression>;
 ```
 
 #### parseProgram pseudocode:
+
 ```
 function parseProgram() {
   program = newProgramASTNode()
@@ -283,69 +328,95 @@ function parseOperatorExpression() {
 ```
 
 ### 2.5 - Parsing Return Statements
+
 #### Example return statements in Monkey:
+
 ```javascript
 return 5;
 return 10;
 return add(15);
 ```
+
 #### Return Statement structure:
+
 ```
 return <expression>;
 ```
+
 ### 2.6 - Parsing Expressions
+
 * In Monkey, everything except `let` and `return` statements are expressions
+
 #### Examples w/ Prefix Operators
+
 ```
 -5
 !true
 !false
 ```
+
 #### Examples w/ Infix Operators
+
 ```
 5 + 5
 5 - 5
 5 / 5
 5 * 5
 ```
+
 #### Examples of Comparison Operators
+
 ```
 foo == bar
 foo != bar
 foo < bar
 foo > bar
 ```
+
 #### Examples Grouped Expressions and Order of Evaluation Influence:
+
 ```
 5 * (5 + 5)
 ((5 + 5) * 5) * 5
 ```
+
 #### Examples of call expressions:
+
 ```
 add(2, 3)
 add(add(2, 3), add(5, 10))
 max(5, add(5, (5 * 5)))
 ```
+
 #### Examples of Identifiers as expressions:
+
 ```
 foo * bar / foobar
 add(foo, bar)
 ```
+
 #### Function literals are expressions too:
+
 ```
 let add = fn(x, y) { return x + y }
 ```
+
 #### Examples of Function literal in place of identifier
+
 ```
 fn(x, y) { return x + y }(5, 5)
 (fn(x) { return x }(5) + 10 ) * 10
 ```
+
 #### Examples of if expressions:
+
 ```
 let result = if (10 > 5) { true } else { false };
 result // => true
 ```
+
 ###### Terminology
+
 * Prefix operator - An operator in front of its operand, Ex:
   * `--5`
     * Operator: `--` (Decrement)
@@ -362,7 +433,9 @@ result // => true
 * Binary expressions - Operator has two operands
 * Operator precedence/Order of operations - Priority which different operators have.
   * `5 + 5 * 10`
+
 ### 2.7 - How Pratt Parsing Works
+
 * Suppose we're parsing the following expression statement:
   * `1 + 2 + 3;`
 * The goal isn't to represent all operators and operands in the resulting AST, but to nest the nodes correctly.
@@ -371,7 +444,8 @@ result // => true
 * The AST needs 2 `*ast.InfixExpression` node
 * The `*ast.InfixExpression` higher in the tree should have the integer literal 3 as it's `Right` child node
 * the `Left` child node needs to be the second `*ast.InfixExpression`.
-* The second `*ast.InfixExpression` needs to have the integer literals 1 and 2 as its `Left` and `Right` child nodes, respectively
+* The second `*ast.InfixExpression` needs to have the integer literals 1 and 2 as its `Left` and `Right` child nodes,
+  respectively
 * See 2.7, page 170/522 in Kindle for AST map representation or:
 * `*ast.InfixExpression`
   * (`Left Node`) `*ast.InfixExpression`
@@ -387,15 +461,149 @@ result // => true
   * `+ = p.peekToken`
   * `parseExpression` checks for `prefixParseFn` associated with current `p.curToken`
     * `token.INT` -> parseIntegerLiteral -> `*ast.IntegerLiteral` assigned to `leftExp`
-  * `parseExpression` sees `p.peekToken` is not a SEMICOLON and `peekPrecedence` is higher than the arg passed to `parseExpression` (SUM > LOWEST)
+  * `parseExpression` sees `p.peekToken` is not a SEMICOLON and `peekPrecedence` is higher than the arg passed to
+    `parseExpression` (SUM > LOWEST)
     * fetch `infixParseFn` for `p.peekToken` -> `parseInfixExpression` -> returns to `leftExp` to advance the token
   * `+ = p.curToken`
   * `2 = p.peekToken`
   * loops here...
+
 ### 2.8 - Extending the Parser
+
 * Capital first letter = Public; lower first letter = Private for method names
 * Adding function literals in this chapter
 
 ### 2.9 - Read-Parse-Print-Loop
+
 * Until now the REPL was more of a RLPL (Read, Lex, Parse, Loop)
 * Next we're going to change it to an RPPL (Read, Parse, Print, Loop)
+
+## 3 - Evaluation
+
+### 3.1 - Giving Meaning to Symbols
+
+* We'll be implementing the E (Evaluation) in our REPL in this chapter.
+* Without the evaluator, we don't get the output of `1 + 2 = 3`, `4 < 3 = false`, etc.
+* The evaluation process of an interpreter defines how the programming language being interpreted works.
+
+```javascript
+let num = 5;
+if (num) {
+  return a;
+} else {
+  return b;
+}
+```
+
+* In some languages, this would return `a`, in other languages `b`. This could be a boolean return as well.
+* This will also determine the order in which to return outputs and evaluation.
+
+### 3.2 - Strategies of Evaluation
+
+* Evaluation is where interpreter implementations diverge the most.
+* Tree-walk interpreters evaluate as they traverse the AST on the fly.
+  * ie, printing a string, adding two numbers, or executing a function's body.
+* Sometimes the evaluation step is preceded by small optimizations that re-write the AST or convert it into another
+  intermediate representation.
+* Others traverse the AST but instead of interpreting the AST itself, then convert to byte-code first. These can't be
+  interpreted by the system like assembly, but instead are interpreted by a virtual machine.
+  * This can be beneficial for performance.
+* JIT ("just in time") interpreters compile byte-code to native machine code right before it's executed.
+* Other JIT interpreters skip byte-code and go straight from the AST to native machine code.
+* Ruby (through v1.8) was a tree-walking interpreter, evaluating the AST while traversing it.
+* Ruby (v1.9+) switched to a virtual machine architecture.
+  * Interpreter parses source code
+  * Builds an AST
+  * Compiles AST into bytecode
+  * Bytecode gets executed in a virtual machine, improving performance.
+* Lua switching to LuaJIT improved benchmarks by up to 50x performance.
+
+### 3.3 - A Tree-Walking Interpreter
+
+* We'll be building a tree-walking interpreter.
+* We'll take the AST the parser builds and interpret in "on the fly" without any preprocessing or compilation step.
+  * Similar to Lisp interpreter.
+  * Inspired by the interpreter in "The Structure and Interpretation of Computer Programs" (SICP)
+  * Easiest way to get started, understand, and extend on later.
+* We need two things:
+  * Tree-waking Evaluator
+  * A way to represent Monkey values in our host language of Go.
+* Pseudocode:
+
+```
+function eval(astNode) {
+  if (astNode is integerLiteral) {
+    return astNode.integerValue
+  } else if (astNode is booleanLiteral) {
+    return astNode.booleanValue
+  } else if (astNode is infixExpression) {
+    leftEvaluated = eval(astNode.Left)
+    rightEvaluated = eval(astNode.Right)
+    
+    if astNode.Operator == "+" {
+      return leftEvaluated + rightEvaluated
+    } else if ast.Operator == "-" {
+      return leftEvaluated - rightEvaluated
+    }
+  }   
+```
+
+* `eval` is recursive.
+* When `astNode is infixExpression` is true, `eval` calls itself again twice to evaluated the left and right operands of
+  the infix expression.
+* This can cascade to another infix expression or integer literal or boolean literal, or identifier, or etc.
+* Same concept as the recursion in the AST, except we're evaluating the tree, not building it.
+
+### 3.4 - Representing Objects
+
+* Not object-oriented, but we need an "object representation" or a "value system" that defines what our `eval` function
+  returns.
+* Different ways of representing objects:
+  * Native types (integers, booleans, etc.) of the host language
+  * Values/objects only represented as pointers
+  * Native types and pointers are mixed
+  * etc.
+* Why the variety?
+  * Host languages differ, i.e., an interpreter written in Ruby can't represent values the same way as an interpreter
+    written in C.
+  * Languages being interpreted differ, i.e., some only need representations of primitive data like integers,
+    characters, or bytes whereas others you'll have lists, dictionaries, functions, or compound data-types.
+  * Resulting execution speed and memory consumption while evaluating programs differ depends on the choice.
+  * For high execution speed, you can't use a slow and bloated object system
+  * If writing a garbage collector, you need to think about how it'll keep track of values in the system.
+  * If performance doesn't matter, then keeping things simple and understandable can be advantageous.
+
+#### Foundation of our Object System
+
+* We'll represent every value we encounter in Monkey as an `Object`.
+* All values will be wrapped inside a struct, which fulfills the `Object` interface.
+* In this chapter, we represented Integer, Boolean, and Null ObjectTypes in our `object.go` file.
+
+### 3.5 - Evaluating Expressions
+
+* In this chapter, we'll be writing our `eval`
+* The first version will looks like:
+
+```
+func Eval(node ast.Node) object.Object
+```
+
+* Eval takes an ast.Node and returns object.Object
+
+#### Integer Literals
+
+* Given an `*ast.IntegerLiteral` our `Eval` function should return an `*object.Integer` whose `Value` field contains the
+  same integer as `*ast.IntegerLiteral.Value`
+
+#### Completing the REPL
+* We'll now be updating the RPPL to an REPL in `repl.go`
+
+#### Prefix Expressions
+#### Infix Expressions
+* The eight infix operators in Monkey are: `+, -, *, /, >, <, ==, !=`
+
+### 3.6 - Conditionals
+* Hardest part of conditional evaluation is deciding when to evaluate what.
+
+### 3.7 - Return Statements
+* Read this next week

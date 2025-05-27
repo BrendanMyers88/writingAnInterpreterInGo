@@ -1,5 +1,7 @@
 # Writing an Interpreter in Go
+
 ## Interpreter features:
+
 * Tokenize and parse Monkey source code in a REPL
 
 1. The Lexer
