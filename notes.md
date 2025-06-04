@@ -606,4 +606,41 @@ func Eval(node ast.Node) object.Object
 * Hardest part of conditional evaluation is deciding when to evaluate what.
 
 ### 3.7 - Return Statements
-* Read this next week
+* Return statements stop the evaluation for a series of statements and leave behind the value their expression has evaluated to.
+
+### 3.8 - Abort! Abort! There's been a mistake!, or: Error Handling
+* Instead of returning nil values, we'll instead change those to handle errors in this chapter
+* This _won't_ be user-defined exceptions, but internal error handling for:
+  * Wrong operators
+  * Unsupported operations
+  * Other user or internal errors that may arise during execution.
+* This will be handled very similarly to the return statements of 3.7.
+  * This is because Errors and return statements both stop the eval for a series of statements.
+
+### 3.9 - Bindings & The Environment
+* Add bindings to the interpreter by adding support for `let` statements
+* We also need to support evaluation of identifiers
+
+### 3.10 - Functions & Function Calls
+* We'll add support for functions and function calls to the interpreter in this chapter
+
+### 3.11 - Who's taking the trash out?
+* In Monkey, we're re-using Go's garbage-collecter rather than handmaking one ourselves up to this point.
+* Go's garbage collector keeps track of which `object.Integer` are still reachable to us and which are not, saving a great deal of system memory.
+* The GC would need to:
+  * Keep track of object allocations
+  * Keep track of references to objects
+  * Make enough memory available for future object allocations
+  * Give memory back when it's not necessary anymore (without this, we'd have a memory leak)
+* Types of GC algorithms:
+  * Mark and Sweep
+  * Generational GC
+  * Stop-the-world GC
+  * Concurrent GC
+  * Need to know how it's organizing memory and handing memory fragmentation
+* Unfortunately, we can't take over Go's Garbage Collector easily as by default, Go prohibits exactly that
+
+## 4 - Extending the Interpreter
+
+### 4.1 - Data Types & Functions
+* Read through 4.x next week
