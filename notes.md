@@ -625,7 +625,7 @@ func Eval(node ast.Node) object.Object
 * We'll add support for functions and function calls to the interpreter in this chapter
 
 ### 3.11 - Who's taking the trash out?
-* In Monkey, we're re-using Go's garbage-collecter rather than handmaking one ourselves up to this point.
+* In Monkey, we're re-using Go's garbage-collector rather than handmaking one ourselves up to this point.
 * Go's garbage collector keeps track of which `object.Integer` are still reachable to us and which are not, saving a great deal of system memory.
 * The GC would need to:
   * Keep track of object allocations
@@ -643,4 +643,33 @@ func Eval(node ast.Node) object.Object
 ## 4 - Extending the Interpreter
 
 ### 4.1 - Data Types & Functions
-* Read through 4.x next week
+* In 4.1 we'll add new data types to the interpreter, rather than just having boolean/integers.
+  * This will include:
+    * Adding new token types
+    * Modifying the lexer
+    * Extending the parser
+    * Adding support for the data types to the evaluator and object system
+  * These data types are already present in Go, therefor we'll just need to make them available in Monkey rather than making them from scratch.
+  * We'll add some new functions to make the interpreter more powerful
+    * Built-in functions
+  * First thing we'll do is add the string data type.
+
+### 4.2 - Strings
+* First, we'll add support for string literals to the lexer. The basic structure is:
+  * `"<sequence of characters>"`, i.e., a sequence of characters enclosed by double quotes.
+
+### 4.3 - Built-in Functions
+* In this section we'll add built-in functions, specifically inheriting from Go
+* For example: A function that returns the current time
+  * Normally does via asking the kernel, which is handled by system calls.
+  * If a language doesn't offer the use of system calls, then the language implementation has to provide something to make these calls on behalf of the users.
+  * The built-ins will be defined by us, the implementers of the interpreter.
+  * The end-user can use them, but they are defined by us.
+* The only restriction is they need to accept zero or more `object.Object` as arguments and return an `object.Object.`
+* Builtin function's we'll add:
+  * `len`: Return number of characters in a string.
+  * `>> len("Hello World!")`
+  * `12`
+
+### 4.4 - Array
+* Read through...
