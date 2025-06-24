@@ -58,6 +58,9 @@ func New(l *lexer.Lexer) *Parser {
 	// Integer Literal
 	p.registerPrefix(token.INT, p.parseIntegerLiteral)
 
+	// String Literal
+	p.registerPrefix(token.STRING, p.parseStringLiteral)
+
 	// Prefix Expressions
 	p.registerPrefix(token.BANG, p.parsePrefixExpression)
 	p.registerPrefix(token.MINUS, p.parsePrefixExpression)
@@ -472,4 +475,8 @@ func (p *Parser) peekError(t token.TokenType) {
 	msg := fmt.Sprintf("expected next token to be %s, got %s instead", t, p.peekToken.Type)
 
 	p.errors = append(p.errors, msg)
+}
+
+func (p *Parser) parseStringLiteral() ast.Expression {
+	return &ast.StringLiteral{Token: p.curToken, Value: p.curToken.Literal}
 }
