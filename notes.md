@@ -672,4 +672,12 @@ func Eval(node ast.Node) object.Object
   * `12`
 
 ### 4.4 - Array
-* Read through...
+* Next data type we'll add is an array.
+  * In Monkey, an array is defined as an ordered list of elements, possibly of different types.
+  * Each element can be accessed individually.
+  * Comma separated list of elements, enclosed by brackets, eg. `myArray = [1, "two", [1, 2], fn(x) { x + y}];`
+  * `myArray[0] >>> 1`
+  * `myArray[2] >>> [1, 2]`
+  * `myArray[2][0] >>> 1`
+* Pick a new book for a new book club
+* Sequel to this book is _Writing a Compiler in Go_ which might be interesting, but I think I'd like to do something in Ruby, Rails, Javascript, Kubernetes, Rust, something that's in our current stack.
